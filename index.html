@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Laporan Pemantauan Kantor WFH</title>
+    
+    <style>
+        /* --- TATA LETAK UTAMA DAN TIPOGRAFI --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2, h3 { margin: 0; font-weight: 600; }
+
+        .laporan-container {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 277mm; 
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e0e6ed;
+            padding-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 1.6em;
+            color: #004a8f;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.8em;
+            color: #555;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .report-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background-color: #f7f9fc;
+            border: 1px solid #e0e6ed;
+        }
+
+        .report-details p {
+            flex: 1 1 45%;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            min-width: 150px;
+        }
+
+        .report-details p.full-width { flex: 1 1 100%; }
+
+        .detail-label {
+            font-size: 0.75em;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 2px;
+        }
+
+        .input-field {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.85em;
+            transition: border-color 0.3s;
+            background-color: white;
+        }
+
+        .input-field:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+        }
+
+        /* --- LAYOUT 3 KOLOM HORIZONTAL --- */
+        .triple-column-container {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .column {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .label-box {
+            padding: 5px 10px;
+            text-align: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .label-box.blue { background-color: #2980b9; }
+        .label-box.dark-blue { background-color: #2c3e50; }
+        .label-box.gray { background-color: #7f8c8d; }
+
+        .stacked-photos {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px;
+            flex: 1;
+        }
+
+        .image-box {
+            position: relative;
+            height: 5cm; 
+            width: 100%; 
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .image-box.has-image { border: 1px solid #ddd; }
+
+        .image-box img {
+            height: 5cm !important;
+            width: 100% !important;
+            object-fit: contain; 
+            background-color: #e9ecef;
+            display: none;
+        }
+
+        .upload-label {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            color: #666; font-size: 0.8em; font-weight: 600;
+            cursor: pointer; text-align: center; padding: 5px;
+            box-sizing: border-box; z-index: 5;
+        }
+
+        .upload-label::before { content: "📷"; font-size: 1.5em; margin-bottom: 2px; display: block; }
+        .upload-label:hover { color: #007bff; background-color: rgba(0, 123, 255, 0.05); }
+        .image-input { display: none; }
+
+        .delete-btn {
+            position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6);
+            color: white; border: none; border-radius: 50%; width: 26px; height: 26px;
+            font-size: 14px; cursor: pointer; z-index: 10; display: none;
+            line-height: 1; padding: 0;
+        }
+        .delete-btn:hover { background: rgba(220, 0, 0, 0.8); }
+
+        .footer {
+            text-align: center;
+            padding: 5px 0;
+            margin-top: 5px;
+            border-top: 1px solid #e0e6ed;
+        }
+
+        .footer h3 { color: #444; font-size: 0.95em; margin-bottom: 2px; }
+        .footer p { font-size: 0.75em; color: #777; font-style: italic; margin: 0; }
+
+        .action-bar { text-align: center; margin-top: 5px; padding: 10px 0; }
+        .action-bar button {
+            padding: 12px 25px; font-size: 1.1em; cursor: pointer;
+            background-color: #28a745; color: white; border: none;
+            border-radius: 6px; font-weight: 600; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+        .action-bar button:hover { background-color: #1e7e34; }
+
+        /* --- PANDUAN PENGGUNAAN --- */
+        .instructions {
+            background-color: #e6f2ff;
+            border-left: 5px solid #007bff;
+            padding: 20px;
+            margin: 15px auto 30px auto;
+            max-width: 277mm;
+            width: 100%;
+            border-radius: 8px;
+            box-sizing: border-box;
+            color: #004085;
+            font-size: 0.95em;
+            line-height: 1.6;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #004085;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions ol { margin-bottom: 0; padding-left: 20px; }
+        .instructions li { margin-bottom: 8px; }
+        .instructions li strong { color: #002752; }
+
+        @media (max-width: 768px) { .triple-column-container { flex-direction: column; } }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            @page { size: A4 landscape; margin: 8mm; }
+
+            body { background-color: white !important; padding: 0; margin: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .laporan-container { width: 100%; max-width: none; box-shadow: none; padding: 0; margin: 0; border: none; }
+            
+            /* ELEMEN YANG DIHILANGKAN SAAT PRINT (Termasuk Panduan) */
+            .action-bar, .upload-label, .delete-btn, .image-input, .instructions { 
+                display: none !important; 
+            }
+
+            .header { margin-bottom: 5px !important; padding-bottom: 3px !important; }
+            .header h1 { font-size: 1.4em !important; } 
+            .subtitle { font-size: 0.75em !important; margin-top: 2px !important;}
+
+            .triple-column-container {
+                display: flex !important; flex-direction: row !important;
+                gap: 10px !important; margin-bottom: 5px !important; page-break-inside: avoid;
+            }
+
+            .column { border: 1px solid #ccc !important; }
+            .label-box { padding: 4px !important; font-size: 0.85em !important; }
+
+            .stacked-photos {
+                display: flex !important; flex-direction: column !important;
+                gap: 6px !important; padding: 6px !important;
+            }
+
+            .image-box {
+                height: 5cm !important; width: 100% !important;
+                border: 1px solid #eee !important; background-color: #f4f4f4 !important; display: flex !important;
+            }
+
+            .image-box img {
+                height: 5cm !important; width: 100% !important;
+                object-fit: contain !important; background-color: #f4f4f4 !important; display: block !important;
+            }
+
+            .footer { padding-top: 5px !important; margin-top: 5px !important;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="laporan-container" id="laporan-content">
+        
+        <div class="header">
+            <h1 id="judul-utama">LAPORAN KONDISI KANTOR (WFH)</h1>
+            <p class="subtitle" id="subtitle">Gedung - Area - Periode | TANGGAL</p>
+        </div>
+        
+        <div class="report-details">
+            <p class="full-width">
+                <label for="input-jenis" class="detail-label">Jenis Laporan</label>
+                <select id="input-jenis" class="input-field" onchange="updateReportType()" style="background-color: #e6f2ff; border-color: #007bff; font-weight: bold;">
+                    <option value="LAPORAN KONDISI KANTOR (WFH)">Pemantauan Kondisi Kantor Saat WFH</option>
+                </select>
+            </p>
+            <p>
+                <label for="input-area" class="detail-label">Area <span style="color:red">*</span></label>
+                <select id="input-area" class="input-field" onchange="updateReportDetails()">
+                    <option value="">-- Pilih Area --</option>
+                    <option value="AREA SULSEL">AREA SULSEL</option>
+                    <option value="AREA SULTENG">AREA SULTENG</option>
+                    <option value="AREA SULUT MALUT">AREA SULUT MALUT</option>
+                    <option value="AREA PAPUA">AREA PAPUA</option>
+                    <option value="AREA PAPUA BARAT">AREA PAPUA BARAT</option>
+                </select>
+            </p>
+            <p>
+                <label for="input-gedung" class="detail-label">Nama Gedung <span style="color:red">*</span></label>
+                <input type="text" id="input-gedung" class="input-field" placeholder="Contoh: STO SOASIU" oninput="updateReportDetails()">
+            </p>
+            <p>
+                <label for="input-periode" class="detail-label">Periode WFH <span style="color:red">*</span></label>
+                <input type="text" id="input-periode" class="input-field" placeholder="Contoh: Hari ke-1 / Week 1" oninput="updateReportDetails()">
+            </p>
+            <p>
+                <label for="input-tanggal" class="detail-label">Tanggal <span style="color:red">*</span></label>
+                <input type="date" id="input-tanggal" class="input-field" onchange="updateReportDetails()">
+            </p>
+        </div>
+
+        <div class="triple-column-container">
+            
+            <div class="column before">
+                <div class="label-box blue">FASILITAS UMUM</div>
+                <div class="stacked-photos">
+                    <div class="image-box" id="box-parkir">
+                        <label for="upload-parkir" class="upload-label">1. Parkiran KBM <span style="color:red">*</span></label>
+                        <input type="file" id="upload-parkir" accept="image/*" class="image-input">
+                        <img id="img-parkir" src="" alt="Foto Parkiran KBM">
+                        <button class="delete-btn" title="Hapus Foto">✖</button>
+                    </div>
+                    <div class="image-box" id="box-lingkungan">
+                        <label for="upload-lingkungan" class="upload-label">2. Kondisi Lingkungan Umum <span style="color:red">*</span></label>
+                        <input type="file" id="upload-lingkungan" accept="image/*" class="image-input">
+                        <img id="img-lingkungan" src="" alt="Foto Lingkungan Umum">
+                        <button class="delete-btn" title="Hapus Foto">✖</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column progress">
+                <div class="label-box dark-blue">LOKASI KOLABORASI</div>
+                <div class="stacked-photos">
+                    <div class="image-box" id="box-kolaborasi">
+                        <label for="upload-kolaborasi" class="upload-label">3. Ruang Kolaborasi <span style="color:red">*</span></label>
+                        <input type="file" id="upload-kolaborasi" accept="image/*" class="image-input">
+                        <img id="img-kolaborasi" src="" alt="Foto Ruang Kolaborasi">
+                        <button class="delete-btn" title="Hapus Foto">✖</button>
+                    </div>
+                    <div class="image-box" id="box-off-1">
+                        <label for="upload-off-1" class="upload-label">4. Keadaan (AC/Listrik) <span style="color:red">*</span></label>
+                        <input type="file" id="upload-off-1" accept="image/*" class="image-input">
+                        <img id="img-off-1" src="" alt="Foto Ruang OFF 1">
+                        <button class="delete-btn" title="Hapus Foto">✖</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column after">
+                <div class="label-box gray">RUANG LAINNYA YANG OFF</div>
+                <div class="stacked-photos">
+                    <div class="image-box" id="box-off-2">
+                        <label for="upload-off-2" class="upload-label">Ruangan OFF (AC/Listrik) - Evident 1 <span style="color:red">*</span></label>
+                        <input type="file" id="upload-off-2" accept="image/*" class="image-input">
+                        <img id="img-off-2" src="" alt="Foto Ruang OFF 2">
+                        <button class="delete-btn" title="Hapus Foto">✖</button>
+                    </div>
+                    <div class="image-box" id="box-off-3">
+                        <label for="upload-off-3" class="upload-label">Ruangan OFF (AC/Listrik) - Evident 2 <span style="color:red">*</span></label>
+                        <input type="file" id="upload-off-3" accept="image/*" class="image-input">
+                        <img id="img-off-3" src="" alt="Foto Ruang OFF 3">
+                        <button class="delete-btn" title="Hapus Foto">✖</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <h3>PEMANTAUAN KONDISI KANTOR SAAT WFH</h3>
+            <p id="footer-location-date">Tanggal | Gedung</p>
+        </div>
+
+    </div>
+
+    <div class="action-bar">
+        <button onclick="printReport()">🖨️ Cetak Laporan (PDF / Kertas A4)</button>
+    </div>
+
+    <div class="instructions" id="panduan-penggunaan">
+        <h3>📋 Panduan Penggunaan Laporan WFH</h3>
+        <ol>
+            <li><strong>Input Data:</strong> Pilih Area, ketik Nama Gedung, Periode WFH, dan Tanggal pemantauan.</li>
+            <li><strong>Upload Foto Evident:</strong> Masukkan 6 foto sesuai dengan label (Parkiran KBM, Lingkungan Umum, Ruang Kolaborasi, dan 3 foto untuk Ruangan yang tidak dipakai dengan kondisi AC & Listrik OFF).</li>
+            <li><strong>Cek Kekosongan:</strong> Pastikan <em>semua kolom dan ke-6 foto sudah terisi</em> sebelum menekan tombol cetak.</li>
+            <li><strong>Cetak & Simpan:</strong> Klik tombol "Cetak Laporan". Pada jendela Print, pilih <strong>"Save as PDF"</strong>.</li>
+        </ol>
+    </div>
+
+    <script>
+        function updateReportType() {
+            const jenis = document.getElementById('input-jenis').value;
+            document.getElementById('judul-utama').innerText = jenis;
+        }
+
+        function resizeImage(file, maxWidth, maxHeight, callback) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL("image/jpeg", 0.8)); 
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setupImageUpload(inputId, imgId) {
+            const input = document.getElementById(inputId);
+            const img = document.getElementById(imgId);
+            const box = document.getElementById(inputId).parentElement; 
+            const label = box.querySelector('.upload-label');
+            const deleteBtn = box.querySelector('.delete-btn');
+
+            input.addEventListener('change', function(event) {
+                if (event.target.files && event.target.files[0]) {
+                    resizeImage(event.target.files[0], 2000, 2000, function(resizedDataUrl) {
+                        img.src = resizedDataUrl;
+                        img.style.display = 'block';
+                        box.classList.add('has-image');
+                        if (label) label.style.display = 'none';
+                        if (deleteBtn) deleteBtn.style.display = 'block';
+                    });
+                }
+            });
+
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    img.src = "";
+                    img.style.display = "none";
+                    input.value = ""; 
+                    box.classList.remove('has-image');
+                    if (label) label.style.display = 'flex';
+                    deleteBtn.style.display = "none";
+                });
+            }
+        }
+
+        function updateReportDetails() {
+            const area = document.getElementById('input-area').value || '[Area]';
+            const gedung = document.getElementById('input-gedung').value || '[Gedung]';
+            const periode = document.getElementById('input-periode').value || '[Periode]';
+            const tanggalInput = document.getElementById('input-tanggal').value;
+
+            let tanggalTampil = '[Tanggal]';
+            if (tanggalInput) {
+                const dateParts = tanggalInput.split('-');
+                if (dateParts.length === 3) {
+                    tanggalTampil = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                }
+            }
+            
+            const subtitleElement = document.getElementById('subtitle');
+            if (subtitleElement) {
+                subtitleElement.textContent = `${gedung} - ${area} - ${periode} | TANGGAL ${tanggalTampil}`;
+            }
+
+            const footerElement = document.getElementById('footer-location-date');
+            if (footerElement) {
+                footerElement.textContent = `${tanggalTampil} | ${gedung}`; 
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            setupImageUpload('upload-parkir', 'img-parkir');
+            setupImageUpload('upload-lingkungan', 'img-lingkungan');
+            setupImageUpload('upload-kolaborasi', 'img-kolaborasi');
+            setupImageUpload('upload-off-1', 'img-off-1');
+            setupImageUpload('upload-off-2', 'img-off-2');
+            setupImageUpload('upload-off-3', 'img-off-3');
+
+            updateReportDetails(); 
+
+            document.getElementById('input-area')?.addEventListener('change', updateReportDetails);
+            document.getElementById('input-gedung')?.addEventListener('input', updateReportDetails);
+            document.getElementById('input-periode')?.addEventListener('input', updateReportDetails);
+            document.getElementById('input-tanggal')?.addEventListener('change', updateReportDetails);
+        });
+
+        // FUNGSI VALIDASI SEBELUM PRINT
+        function printReport() {
+            // Cek Isian Teks
+            const area = document.getElementById('input-area').value.trim();
+            const gedung = document.getElementById('input-gedung').value.trim();
+            const periode = document.getElementById('input-periode').value.trim();
+            const tanggal = document.getElementById('input-tanggal').value;
+
+            if (!area || !gedung || !periode || !tanggal) {
+                alert("⚠️ HARAP LENGKAPI DATA!\n\nPastikan Area, Nama Gedung, Periode, dan Tanggal sudah terisi semua sebelum mencetak laporan.");
+                return; // Batalkan proses print
+            }
+
+            // Cek Isian Foto (Apakah box memiliki class 'has-image')
+            const f1 = document.getElementById('box-parkir').classList.contains('has-image');
+            const f2 = document.getElementById('box-lingkungan').classList.contains('has-image');
+            const f3 = document.getElementById('box-kolaborasi').classList.contains('has-image');
+            const f4 = document.getElementById('box-off-1').classList.contains('has-image');
+            const f5 = document.getElementById('box-off-2').classList.contains('has-image');
+            const f6 = document.getElementById('box-off-3').classList.contains('has-image');
+
+            if (!f1 || !f2 || !f3 || !f4 || !f5 || !f6) {
+                const konfirmasi = confirm("⚠️ MASIH ADA FOTO YANG KOSONG!\n\nKeenam foto pemantauan WFH wajib diisi.\n\nApakah Anda yakin ingin tetap mencetak dokumen ini?");
+                if (!konfirmasi) {
+                    return; // Batalkan proses print jika user pilih "Cancel"
+                }
+            }
+
+            // Lanjut ke proses print browser
+            window.print();
+        }
+    </script>
+</body>
+</html>
